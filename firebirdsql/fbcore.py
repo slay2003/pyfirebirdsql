@@ -114,33 +114,6 @@ TIME = DBAPITypeObject(datetime.time)
 ROWID = DBAPITypeObject()
 
 
-def parse_dsn(dsn, host=None, port=None, database=None):
-    if dsn:
-        i = dsn.find(':')
-        if i < 0:
-            hostname = host
-            filename = dsn
-        else:
-            hostport = dsn[:i]
-            filename = dsn[i+1:]
-            i = hostport.find('/')
-            if i < 0:
-                hostname = hostport
-            else:
-                hostname = hostport[:i]
-                port = int(hostport[i+1:])
-    else:
-        hostname = host
-        port = port
-        filename = database
-    if hostname is None:
-        hostname = 'localhost'
-    if port is None:
-        port = 3050
-
-    return hostname, port, filename
-
-
 class Statement(object):
     """
     statement handle and status (open/close)
