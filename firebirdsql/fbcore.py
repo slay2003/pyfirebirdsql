@@ -114,6 +114,33 @@ TIME = DBAPITypeObject(datetime.time)
 ROWID = DBAPITypeObject()
 
 
+def parse_dsn(dsn, host=None, port=None, database=None):
+    if dsn:
+        i = dsn.find(':')
+        if i < 0:
+            hostname = host
+            filename = dsn
+        else:
+            hostport = dsn[:i]
+            filename = dsn[i+1:]
+            i = hostport.find('/')
+            if i < 0:
+                hostname = hostport
+            else:
+                hostname = hostport[:i]
+                port = int(hostport[i+1:])
+    else:
+        hostname = host
+        port = port
+        filename = database
+    if hostname is None:
+        hostname = 'localhost'
+    if port is None:
+        port = 3050
+
+    return hostname, port, filename
+
+
 class Statement(object):
     """
     statement handle and status (open/close)
@@ -562,7 +589,7 @@ class Connection(WireProtocol):
 
     def __init__(
         self, dsn=None, user=None, password=None, role=None, host=None,
-        database=None, charset=DEFAULT_CHARSET, port=3050,
+        database=None, charset=DEFAULT_CHARSET, port=None,
         page_size=4096, is_services=False, cloexec=False,
         timeout=None, isolation_level=None, use_unicode=None,
         auth_plugin_name=None, wire_crypt=True, create_new=False,
@@ -574,26 +601,7 @@ class Connection(WireProtocol):
         WireProtocol.__init__(self)
         self.sock = None
         self.db_handle = None
-        if dsn:
-            i = dsn.find(':')
-            if i < 0:
-                self.hostname = host
-                self.filename = dsn
-            else:
-                hostport = dsn[:i]
-                self.filename = dsn[i+1:]
-                i = hostport.find('/')
-                if i < 0:
-                    self.hostname = hostport
-                else:
-                    self.hostname = hostport[:i]
-                    port = int(hostport[i+1:])
-        else:
-            self.hostname = host
-            self.filename = database
-        if self.hostname is None:
-            self.hostname = 'localhost'
-        self.port = port
+        self.hostname, self.port, self.filename = parse_dsn(dsn, host, port, database)
         self.user = user
         self.password = password
         self.role = role
