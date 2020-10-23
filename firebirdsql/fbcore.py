@@ -574,9 +574,7 @@ class Connection(WireProtocol):
         WireProtocol.__init__(self)
         self.sock = None
         self.db_handle = None
-        self.hostname, self.port, self.filename = parse_dsn(dsn, host, port, database)
-        self.user = user
-        self.password = password
+        (self.hostname, self.port, self.filename, self.user, self.password) = parse_dsn(dsn, host, port, database, user, password)
         self.role = role
         self.charset = charset
         self.timeout = float(timeout) if timeout is not None else None

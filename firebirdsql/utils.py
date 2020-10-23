@@ -130,31 +130,24 @@ def byte_to_int(b):
         return ord(b)
 
 
-def parse_dsn(dsn, host=None, port=None, database=None):
+def parse_dsn(dsn, host=None, port=None, database=None, user=None, password=None):
     if dsn:
-        i = dsn.find('/')
-        if i < 0:
-
         i = dsn.find(':')
         if i < 0:
-            hostname = host
-            filename = dsn
+            host = host
+            database = dsn
         else:
             hostport = dsn[:i]
-            filename = dsn[i+1:]
+            database = dsn[i+1:]
             i = hostport.find('/')
             if i < 0:
-                hostname = hostport
+                host = hostport
             else:
-                hostname = hostport[:i]
+                host = hostport[:i]
                 port = int(hostport[i+1:])
-    else:
-        hostname = host
-        port = port
-        filename = database
-    if hostname is None:
-        hostname = 'localhost'
+    if host is None:
+        host = 'localhost'
     if port is None:
         port = 3050
 
-    return hostname, port, filename
+    return host, port, database, user, password
