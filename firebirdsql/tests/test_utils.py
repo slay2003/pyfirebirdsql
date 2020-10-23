@@ -9,4 +9,19 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(b, b'712C5F8A2DB82464C4D640AE971025AA50AB64906D4F044F822E8AF8A58ADABBDBE1EFABA00BCCD4CDAA8A955BC43C3600BEAB9EBB9BD41ACC56E37F1A48F17293F24E876B53EEA6A60712D3F943769056B63202416827B400E162A8C0938D482274307585E0BC1D9DD52EFA7330B28E41B7CFCEFD9E8523FD11440EE5DE93A8')
         self.assertEqual(utils.bytes_to_hex(b), s)
 
-
+    def test_dsn(self):
+        self.assertEqual(utils.parse_dsn("user:password@localhost:3000/dbname"), ("localhost", 3000, "dbname", "user", "password"))
+        self.assertEqual(utils.parse_dsn("user:password@localhost/dbname"), ("localhost", 3050, "dbname", "user", "password"))
+        self.assertEqual(utils.parse_dsn("user:password@localhost/dir/dbname"), ("localhost", 3050, "/dir/dbname", "user", "password"))
+        self.assertEqual(utils.parse_dsn("user:password@localhost/c:\\fbdata\\database.fdb"), ("localhost", 3050, "c:\\fbdata\\database.fdb", "user", "password"))
+        self.assertEqual(utils.parse_dsn("user:password@localhost/c:/fbdata/database.fdb"), ("localhost", 3050, "c:/fbdata/database.fdb", "user", "password"))
+        self.assertEqual(utils.parse_dsn("user@localhost:3000/dbname"), ("localhost", 3000, "dbname", "user", None))
+        self.assertEqual(utils.parse_dsn("user@localhost/dbname"), ("localhost", 3050, "dbname", "user", None))
+        self.assertEqual(utils.parse_dsn("user@localhost/dir/dbname"), ("localhost", 3050, "/dir/dbname", "user", None))
+        self.assertEqual(utils.parse_dsn("user@localhost/c:\\fbdata\\database.fdb"), ("localhost", 3050, "c:\\fbdata\\database.fdb", "user", None))
+        self.assertEqual(utils.parse_dsn("user@localhost/c:/fbdata/database.fdb"), ("localhost", 3050, "c:/fbdata/database.fdb", "user", None))
+        self.assertEqual(utils.parse_dsn("localhost:3000/dbname"), ("localhost", 3000, "dbname", None, None))
+        self.assertEqual(utils.parse_dsn("localhost/dbname"), ("localhost", 3050, "dbname", None, None))
+        self.assertEqual(utils.parse_dsn("localhost/dir/dbname"), ("localhost", 3050, "/dir/dbname", None, None))
+        self.assertEqual(utils.parse_dsn("localhost/c:\\fbdata\\database.fdb"), ("localhost", 3050, "c:\\fbdata\\database.fdb", None, None))
+        self.assertEqual(utils.parse_dsn("localhost/c:/fbdata/database.fdb"), ("localhost", 3050, "c:/fbdata/database.fdb", None, None))

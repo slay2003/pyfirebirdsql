@@ -28,6 +28,10 @@
 import sys
 import binascii
 import struct
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 from firebirdsql import InternalError
 
 PYTHON_MAJOR_VER = sys.version_info[0]
@@ -132,19 +136,22 @@ def byte_to_int(b):
 
 def parse_dsn(dsn, host=None, port=None, database=None, user=None, password=None):
     if dsn:
-        i = dsn.find(':')
-        if i < 0:
-            host = host
-            database = dsn
-        else:
-            hostport = dsn[:i]
-            database = dsn[i+1:]
-            i = hostport.find('/')
-            if i < 0:
-                host = hostport
-            else:
-                host = hostport[:i]
-                port = int(hostport[i+1:])
+        parsed = urlparse("//" + dsn)
+        if host is None and parsed.hostname is not None:
+            host = parsed.hostname
+        if port is None and parsed.port is not None:
+            port = parsed.port
+        if database is None and parsed.path is not None:
+            database = parsed.path
+            assert(database[0] == '/')
+            if '/' not in database[1:]:
+                database = database[1:]
+            elif database[2] == ':':     # Windows drive letter
+                database = database[1:]
+        if user is None and parsed.username is not None:
+            user = parsed.username
+        if password is None and parsed.password is not None:
+            password = parsed.password
     if host is None:
         host = 'localhost'
     if port is None:
