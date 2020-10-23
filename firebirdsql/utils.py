@@ -132,6 +132,9 @@ def byte_to_int(b):
 
 def parse_dsn(dsn, host=None, port=None, database=None):
     if dsn:
+        i = dsn.find('/')
+        if i < 0:
+
         i = dsn.find(':')
         if i < 0:
             hostname = host
